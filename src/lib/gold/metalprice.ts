@@ -1,49 +1,58 @@
-// lib/gold/metalprice.ts
-import { GoldProvider, GoldData } from './types';
+import { GoldReport } from './types';
 
 const API_BASE_URL = 'https://api.metalpriceapi.com/v1/latest';
 
-export class MetalPriceProvider implements GoldProvider {
+export class MetalPriceProvider {
   private apiKey: string;
 
   constructor() {
-    // In Next.js, use process.env to access server-side secrets
     const key = process.env.METAL_PRICE_API_KEY;
-    if (!key) {
-      throw new Error(
-        'METAL_PRICE_API_KEY is not set in environment variables'
-      );
-    }
+    if (!key) throw new Error('METAL_PRICE_API_KEY is not set');
     this.apiKey = key;
   }
 
-  async getGoldPrice(currency: 'USD' | 'GBP'): Promise<GoldData> {
+  private async fetchPrice(currency: string): Promise<number> {
+    // MetalPriceAPI returns 1/Price (Exchange Rate).
+    // We invert it to get Price per Ounce.
+    const response = await fetch(
+      `${API_BASE_URL}?api_key=${this.apiKey}&base=${currency}&currencies=XAU`,
+      { next: { revalidate: 0 } } // No cache for live data
+    );
+
+    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+    const data = await response.json();
+
+    // Safety check for API response structure
+    if (!data.rates || !data.rates.XAU) {
+      throw new Error(`Invalid API data for ${currency}`);
+    }
+
+    return 1 / data.rates.XAU; // Price of 1 Ounce
+  }
+
+  async getFullReport(): Promise<GoldReport> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}?api_key=${this.apiKey}&base=${currency}&currencies=XAU`,
-        { next: { revalidate: 3600 } } // Cache for 1 hour (Senior move: save API quota)
-      );
-
-      if (!response.ok) {
-        throw new Error(`MetalPriceAPI failed: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      // The API returns 1 unit of currency per XAU (Gold).
-      // Example response: { "rates": { "XAU": 0.00045 } } -> means 1 USD = 0.00045 oz of Gold
-      // We need to invert it: 1 / 0.00045 = Price of 1 oz of Gold in USD.
-
-      const rate = data.rates.XAU;
-      const pricePerOunce = 1 / rate;
+      // Parallel Fetch: Get USD and GBP at the same time
+      const [usdPrice, gbpPrice] = await Promise.all([
+        this.fetchPrice('USD'),
+        this.fetchPrice('GBP'),
+      ]);
 
       return {
-        price: pricePerOunce,
-        currency: currency,
         timestamp: Date.now(),
+        usd: {
+          ounce: usdPrice,
+          gram: usdPrice / 31.1035, // Troy Ounce to Gram
+          kilo: usdPrice * 32.1507, // Troy Ounce to Kilo
+        },
+        gbp: {
+          ounce: gbpPrice,
+          gram: gbpPrice / 31.1035,
+          kilo: gbpPrice * 32.1507,
+        },
       };
     } catch (error) {
-      console.error('Failed to fetch gold price:', error);
+      console.error('Failed to generate gold report:', error);
       throw error;
     }
   }

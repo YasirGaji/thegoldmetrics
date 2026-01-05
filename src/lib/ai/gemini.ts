@@ -1,27 +1,37 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ANALYST_PERSONA } from './prompts';
+import { GoldReport } from '@/lib/gold/types'; // Import the new type
 
 if (!process.env.GEMINI_API_KEY) {
-  throw new Error('Missing GEMINI_API_KEY environment variable');
+  throw new Error('Missing GEMINI_API_KEY');
 }
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
-export async function generateMarketUpdate(price: number, currency: string) {
+export async function generateMarketUpdate(report: GoldReport) {
+  // Format the date nicely
+  const date = new Date().toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
   const prompt = `
     ${ANALYST_PERSONA}
 
-    TASK:
-    Generate a social media post (X/Twitter style, under 280 chars) based on this data:
-    - Asset: Gold (XAU)
-    - Current Price: ${currency} ${price.toFixed(2)}
+    DATA INPUT:
+    Date: ${date}
+    
+    USD Prices:
+    - Gram: ${report.usd.gram.toFixed(2)}
+    - Ounce: ${report.usd.ounce.toFixed(2)}
+    - Kilo: ${report.usd.kilo.toFixed(2)}
 
-    FORMATTING RULES:
-    - Use emojis sparingly (e.g., 📊, 🥇).
-    - State the price clearly.
-    - Add a brief, 1-sentence analytical comment based on the price level (e.g., "Holding strong above support" or "Testing new highs").
-    - End with: #TheGoldMetrics
+    GBP Prices:
+    - Gram: ${report.gbp.gram.toFixed(2)}
+    - Ounce: ${report.gbp.ounce.toFixed(2)}
+    - Kilo: ${report.gbp.kilo.toFixed(2)}
   `;
 
   try {
