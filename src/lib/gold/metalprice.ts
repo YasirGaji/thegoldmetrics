@@ -3,20 +3,19 @@ import { GoldReport } from './types';
 const API_BASE_URL = 'https://api.metalpriceapi.com/v1/latest';
 
 export class MetalPriceProvider {
-  private apiKey: string;
-
-  constructor() {
+  private getApiKey(): string {
     const key = process.env.METAL_PRICE_API_KEY;
     if (!key) throw new Error('METAL_PRICE_API_KEY is not set');
-    this.apiKey = key;
+    return key;
   }
 
   private async fetchPrice(currency: string): Promise<number> {
+    const apiKey = this.getApiKey();
     // MetalPriceAPI returns 1/Price (Exchange Rate).
     // We invert it to get Price per Ounce.
     const response = await fetch(
-      `${API_BASE_URL}?api_key=${this.apiKey}&base=${currency}&currencies=XAU`,
-      { next: { revalidate: 0 } } // No cache for live data
+      `${API_BASE_URL}?api_key=${apiKey}&base=${currency}&currencies=XAU`,
+      { next: { revalidate: 0 } }
     );
 
     if (!response.ok) throw new Error(`API Error: ${response.statusText}`);

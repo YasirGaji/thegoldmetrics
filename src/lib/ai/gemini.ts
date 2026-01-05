@@ -2,14 +2,17 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ANALYST_PERSONA } from './prompts';
 import { GoldReport } from '@/lib/gold/types'; // Import the new type
 
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error('Missing GEMINI_API_KEY');
-}
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
-
 export async function generateMarketUpdate(report: GoldReport) {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('Missing GEMINI_API_KEY environment variable');
+  }
+
+  // Initialize inside the function
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
+
   // Format the date nicely
   const date = new Date().toLocaleDateString('en-US', {
     month: 'long',
