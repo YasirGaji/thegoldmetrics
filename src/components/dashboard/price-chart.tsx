@@ -51,8 +51,8 @@ export function PriceChart() {
 
       {/* Header with REAL Price */}
       <div className="mb-6 px-4">
-        <div className="text-sm text-muted-foreground font-medium uppercase tracking-wide">
-          Gold Price (XAU/USD)
+        <div className="text-sm text-muted-foreground font-medium tracking-wide">
+          GOLD PRICE/oz (XAU/USD)
         </div>
         <div className="flex items-baseline space-x-3">
           <span className="text-4xl font-bold text-primary">

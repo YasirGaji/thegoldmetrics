@@ -1,3 +1,4 @@
+import { MarketStatus } from '@/components/dashboard/market-status';
 import { PriceChart } from '@/components/dashboard/price-chart';
 import { TickerTape } from '@/components/dashboard/ticker-tape';
 
@@ -11,13 +12,7 @@ export default function Home() {
       <div className="flex-1 container mx-auto px-4 py-12 flex flex-col items-center justify-center space-y-8">
         {/* Header Section */}
         <div className="text-center space-y-4 animate-fade-up">
-          <div className="animate-fade-up opacity-0 [animation-delay:100ms] inline-flex items-center gap-2 px-3 py-1 mb-8 text-xs font-medium border rounded-full bg-white/50 border-gold-subtle/50 text-gold-dark backdrop-blur-md shadow-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            Live Market Data
-          </div>
+          <MarketStatus />
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-primary">
             The Gold Metrics
           </h1>
