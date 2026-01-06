@@ -1,7 +1,10 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* --- Colors --- */
+  /* --- The Gold Palette --- */
   --color-gold-light: #EADDA9;
   --color-gold: #8D7239;
   --color-gold-dark: #7B5F36;
@@ -12,32 +15,107 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, sfmono-regular, monospace;
 
-  /* --- Register Animations --- */
-  /* We define the utility name here, referencing the keyframes below */
+  /* --- Radius for Cards/Buttons --- */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* --- Custom Animations --- */
   --animate-fade-up: fade-up 0.8s ease-out forwards;
   --animate-fade-in: fade-in 1s ease-out forwards;
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  /* --- Map Shadcn Colors to Gold Palette --- */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 }
 
-/* --- Keyframes (MUST be outside @theme) --- */
+/* --- Base Variables (The "Rolex" Look) --- */
+:root {
+  /* Light Mode (Default) */
+  --background: #FDFCF8; /* Warm White */
+  --foreground: #7B5F36; /* Gold Dark */
+
+  --card: #FFFFFF;
+  --card-foreground: #7B5F36;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #7B5F36;
+
+  --primary: #8D7239;   /* The Main Gold */
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #EADDA9; /* Gold Light */
+  --secondary-foreground: #7B5F36;
+
+  --muted: #F5F0E6;
+  --muted-foreground: #C8B792;
+
+  --accent: #F5F0E6;
+  --accent-foreground: #8D7239;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+
+  --border: #EADDA9;    /* Gold Borders */
+  --input: #EADDA9;
+  --ring: #8D7239;
+
+  --radius: 0.75rem; /* Rounded corners like Apple cards */
+}
+
+.dark {
+  /* We can define Dark Mode later, for now mapping to inverted Gold */
+  --background: #1a150e; 
+  --foreground: #EADDA9;
+  --primary: #EADDA9;
+  --primary-foreground: #1a150e;
+}
+
+/* --- Global Resets --- */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  /* Keep the radial gradient for the "Premium" feel */
+  background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--color-gold-light) 120%);
+  background-attachment: fixed;
+}
+
+/* --- Keyframes --- */
 @-webkit-keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @-webkit-keyframes fade-in {
@@ -50,9 +128,22 @@
   to { opacity: 1; }
 }
 
-/* --- Global Styles --- */
-body {
-  background: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--color-gold-light) 100%);
-  color: var(--color-gold-dark);
-  min-height: 100vh;
+@-webkit-keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@-webkit-keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
 }
