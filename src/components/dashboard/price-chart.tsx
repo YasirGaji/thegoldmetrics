@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   AreaChart,
   Area,
@@ -12,16 +13,16 @@ import {
 import { useGoldPrice } from '@/hooks/use-gold-price';
 import { Loader2 } from 'lucide-react';
 
-// Keep Mock Data for the *Shape* of the chart (since there's no history DB yet)
+// Mock history for visual shape
 const MOCK_HISTORY = [
-  { time: '09:00', price: 2740.5 },
-  { time: '11:00', price: 2745.2 },
-  { time: '13:00', price: 2742.1 },
-  { time: '15:00', price: 2750.8 },
-  { time: '17:00', price: 2748.3 },
-  { time: '19:00', price: 2755.0 },
-  { time: '21:00', price: 2752.4 },
-  { time: '23:00', price: 2758.9 },
+  { time: '09:00', value: 100 },
+  { time: '11:00', value: 102 },
+  { time: '13:00', value: 101 },
+  { time: '15:00', value: 104 },
+  { time: '17:00', value: 103 },
+  { time: '19:00', value: 106 },
+  { time: '21:00', value: 105 },
+  { time: '23:00', value: 108 },
 ];
 
 const currencyFormatter = (value: number) =>
@@ -29,50 +30,78 @@ const currencyFormatter = (value: number) =>
     value
   );
 
-export function PriceChart() {
-  // 1. Get Real Data
-  const { price, isLoading } = useGoldPrice();
+type Unit = 'oz' | 'g' | 'kg';
 
-  // 2. Determine Display Values
-  // If loading, show placeholder. If loaded, show REAL price.
-  const currentPrice = price || 2765.5;
-  const isPositive = true; // Hardcoded for now until we have history
+export function PriceChart() {
+  const { prices, isLoading } = useGoldPrice();
+  const [unit, setUnit] = useState<Unit>('oz');
+
+  // Determine which price to show
+  const currentPrice = prices[unit] || 0;
+  const isPositive = true; // Placeholder until history DB
   const chartColor = '#10b981';
 
   return (
     <div className="w-full h-full relative">
-      {/* Loading State Overlay */}
+      {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute top-4 right-4 text-xs text-gold animate-pulse flex items-center">
+        <div className="absolute top-4 right-4 text-xs text-gold animate-pulse flex items-center z-10">
           <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-          Syncing Live Market...
+          Syncing...
         </div>
       )}
 
-      {/* Header with REAL Price */}
-      <div className="mb-6 px-4">
-        <div className="text-sm text-muted-foreground font-medium tracking-wide">
-          GOLD PRICE/oz (XAU/USD)
+      {/* Header Row */}
+      <div className="mb-8 px-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        {/* Left: The Big Number */}
+        <div>
+          <div className="text-sm text-muted-foreground font-medium uppercase tracking-wide flex items-center gap-2">
+            Gold Price (
+            {unit === 'oz' ? 'Troy Ounce' : unit === 'g' ? 'Gram' : 'Kilogram'})
+            <span className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground">
+              XAU/USD
+            </span>
+          </div>
+
+          <div className="flex items-baseline space-x-3 mt-1">
+            <span className="text-4xl md:text-5xl font-bold text-primary tracking-tight">
+              {isLoading ? 'Loading...' : currencyFormatter(currentPrice)}
+            </span>
+            <span
+              className={`text-lg font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}
+            >
+              +0.45%
+            </span>
+          </div>
         </div>
-        <div className="flex items-baseline space-x-3">
-          <span className="text-4xl font-bold text-primary">
-            {/* Display the Real Price */}
-            {isLoading ? 'Loading...' : currencyFormatter(currentPrice)}
-          </span>
-          <span
-            className={`text-lg font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}
-          >
-            +0.45% (24h)
-          </span>
+
+        {/* Right: The Toggle Switch (BullionByPost Style) */}
+        <div className="flex bg-muted p-1 rounded-lg border border-gold-light/20 self-start md:self-auto">
+          {(['oz', 'g', 'kg'] as Unit[]).map((u) => (
+            <button
+              key={u}
+              onClick={() => setUnit(u)}
+              className={`
+                px-4 py-1.5 text-sm font-semibold rounded-md transition-all duration-200
+                ${
+                  unit === u
+                    ? 'bg-white text-primary shadow-sm ring-1 ring-gold/20'
+                    : 'text-muted-foreground hover:text-primary hover:bg-white/50'
+                }
+              `}
+            >
+              {u.toUpperCase()}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* The Chart (Visuals) */}
-      <div className="h-100 w-full opacity-90 hover:opacity-100 transition-opacity duration-500">
+      {/* The Chart */}
+      <div className="h-87.5 w-full opacity-90 hover:opacity-100 transition-opacity duration-500">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={MOCK_HISTORY}
-            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
           >
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
@@ -90,16 +119,14 @@ export function PriceChart() {
               dataKey="time"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: 'var(--color-muted-foreground)', fontSize: 12 }}
+              tick={{ fill: 'var(--color-muted-foreground)', fontSize: 11 }}
               dy={10}
             />
             <YAxis
-              domain={['auto', 'auto']}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: 'var(--color-muted-foreground)', fontSize: 12 }}
-              tickFormatter={(value) => `$${value}`}
-              dx={-10}
+              tick={{ fill: 'var(--color-muted-foreground)', fontSize: 11 }}
+              tickFormatter={() => ''}
             />
             <Tooltip
               contentStyle={{
@@ -108,11 +135,11 @@ export function PriceChart() {
                 borderRadius: 'var(--radius-sm)',
               }}
               itemStyle={{ color: 'var(--color-primary)' }}
-              formatter={(value) => [currencyFormatter(Number(value)), 'Price']}
+              formatter={() => ['Data', 'Trend']}
             />
             <Area
               type="monotone"
-              dataKey="price"
+              dataKey="value"
               stroke={chartColor}
               strokeWidth={3}
               fillOpacity={1}
