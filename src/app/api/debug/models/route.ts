@@ -9,11 +9,8 @@ export async function GET() {
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    // This is the "Admin" call that lists what you actually own
-    const modelResponse = await genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-    }).apiKey;
+    // We just initialize the client to verify the key works.
+    new GoogleGenerativeAI(apiKey);
 
     // The SDK doesn't always expose listModels directly on the main class in all versions,
     // so we use a direct fetch to the API to be 100% sure.
