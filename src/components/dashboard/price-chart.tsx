@@ -12,18 +12,7 @@ import {
 } from 'recharts';
 import { useGoldPrice } from '@/hooks/use-gold-price';
 import { Loader2 } from 'lucide-react';
-
-// Mock history for visual shape
-const MOCK_HISTORY = [
-  { time: '09:00', value: 100 },
-  { time: '11:00', value: 102 },
-  { time: '13:00', value: 101 },
-  { time: '15:00', value: 104 },
-  { time: '17:00', value: 103 },
-  { time: '19:00', value: 106 },
-  { time: '21:00', value: 105 },
-  { time: '23:00', value: 108 },
-];
+import { useGoldHistory } from '@/hooks/use-gold-history';
 
 const currencyFormatter = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
@@ -33,17 +22,46 @@ const currencyFormatter = (value: number) =>
 type Unit = 'oz' | 'g' | 'kg';
 
 export function PriceChart() {
-  const { prices, isLoading } = useGoldPrice();
+  const { prices, isLoading: isLiveLoading } = useGoldPrice();
+  const { history, isLoading: isHistoryLoading } = useGoldHistory();
   const [unit, setUnit] = useState<Unit>('oz');
 
-  // Determine which price to show
+  const isLoading = isLiveLoading || isHistoryLoading;
+
+  // 1. Get Current Price (End of the line)
   const currentPrice = prices[unit] || 0;
-  const isPositive = true; // Placeholder until history DB
-  const chartColor = '#10b981';
+
+  // 2. Prepare Chart Data (The History Line)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const chartData = history.map((point: any) => {
+    let val = point.price_usd;
+
+    if (unit === 'g') val = val / 31.1035;
+    if (unit === 'kg') val = val * 32.1507;
+
+    return {
+      time: point.time,
+      value: val,
+    };
+  });
+
+  // --- NEW: DYNAMIC CALCULATION ---
+  // 3. Get Start Price (The oldest point in your database)
+  // If history is empty (new DB), assume no change (start = current)
+  const startPrice = chartData.length > 0 ? chartData[0].value : currentPrice;
+
+  // 4. Calculate Percentage Change
+  // Formula: ((New - Old) / Old) * 100
+  const changeValue = currentPrice - startPrice;
+  const changePercent = startPrice > 0 ? (changeValue / startPrice) * 100 : 0;
+
+  // 5. Determine Color
+  const isPositive = changePercent >= 0;
+  const chartColor = isPositive ? '#10b981' : '#ef4444'; // Green or Red
+  // --------------------------------
 
   return (
     <div className="w-full h-full relative">
-      {/* Loading Overlay */}
       {isLoading && (
         <div className="absolute top-4 right-4 text-xs text-gold animate-pulse flex items-center z-10">
           <Loader2 className="w-3 h-3 mr-1 animate-spin" />
@@ -51,9 +69,7 @@ export function PriceChart() {
         </div>
       )}
 
-      {/* Header Row */}
       <div className="mb-8 px-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        {/* Left: The Big Number */}
         <div>
           <div className="text-sm text-muted-foreground font-medium uppercase tracking-wide flex items-center gap-2">
             Gold Price (
@@ -67,15 +83,19 @@ export function PriceChart() {
             <span className="text-4xl md:text-5xl font-bold text-primary tracking-tight">
               {isLoading ? 'Loading...' : currencyFormatter(currentPrice)}
             </span>
+
+            {/* DYNAMIC CHANGE INDICATOR */}
             <span
-              className={`text-lg font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}
+              className={`text-lg font-medium ${
+                isPositive ? 'text-green-600' : 'text-red-600'
+              }`}
             >
-              +0.45%
+              {isPositive ? '+' : ''}
+              {changePercent.toFixed(2)}%
             </span>
           </div>
         </div>
 
-        {/* Right: The Toggle Switch (BullionByPost Style) */}
         <div className="flex bg-muted p-1 rounded-lg border border-gold-light/20 self-start md:self-auto">
           {(['oz', 'g', 'kg'] as Unit[]).map((u) => (
             <button
@@ -96,11 +116,10 @@ export function PriceChart() {
         </div>
       </div>
 
-      {/* The Chart */}
       <div className="h-87.5 w-full opacity-90 hover:opacity-100 transition-opacity duration-500">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={MOCK_HISTORY}
+            data={chartData}
             margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
           >
             <defs>
@@ -127,6 +146,7 @@ export function PriceChart() {
               tickLine={false}
               tick={{ fill: 'var(--color-muted-foreground)', fontSize: 11 }}
               tickFormatter={() => ''}
+              domain={['auto', 'auto']} // Make chart scale dynamic to see small changes
             />
             <Tooltip
               contentStyle={{
@@ -135,7 +155,7 @@ export function PriceChart() {
                 borderRadius: 'var(--radius-sm)',
               }}
               itemStyle={{ color: 'var(--color-primary)' }}
-              formatter={() => ['Data', 'Trend']}
+              formatter={(value) => [currencyFormatter(Number(value)), 'Price']}
             />
             <Area
               type="monotone"

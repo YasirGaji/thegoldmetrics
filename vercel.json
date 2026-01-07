@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/daily-post?key=${CRON_SECRET}",
       "schedule": "0 14 * * 1-5"
+    },
+    {
+      "path": "/api/cron/record-price?key=${CRON_SECRET}",
+      "schedule": "0 21 * * 1-5"
     }
   ]
 }
