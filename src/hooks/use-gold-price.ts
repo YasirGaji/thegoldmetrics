@@ -13,6 +13,7 @@ export function useGoldPrice() {
       oz: data?.price,
       g: data?.gram,
       kg: data?.kilo,
+      gbp: data?.price_gbp,
     },
     change: data?.change_24h,
     isLoading,
