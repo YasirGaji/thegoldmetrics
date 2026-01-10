@@ -16,10 +16,9 @@ export async function GET() {
 
     // Format for the frontend chart (Recharts expects specific keys)
     const formattedData = data.map((row) => ({
-      time: new Date(row.timestamp).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false, // 24h format looks better on financial charts
+      date: new Date(row.timestamp).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
       }),
       price_usd: row.price_usd,
       price_gbp: row.price_gbp,
