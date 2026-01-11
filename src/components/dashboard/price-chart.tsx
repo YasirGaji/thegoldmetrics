@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   AreaChart,
   Area,
@@ -27,38 +27,26 @@ export function PriceChart() {
   const [unit, setUnit] = useState<Unit>('oz');
 
   const isLoading = isLiveLoading || isHistoryLoading;
-
-  // 1. Get Current Price (End of the line)
   const currentPrice = prices[unit] || 0;
 
-  // 2. Prepare Chart Data (The History Line)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const chartData = history.map((point: any) => {
-    let val = point.price_usd;
+  const chartData = useMemo(() => {
+    return history.map((point: { date: string; price_usd: number }) => {
+      let val = Number(point.price_usd);
+      if (unit === 'g') val = val / 31.1035;
+      if (unit === 'kg') val = val * 32.1507;
 
-    if (unit === 'g') val = val / 31.1035;
-    if (unit === 'kg') val = val * 32.1507;
+      return {
+        date: point.date,
+        value: val,
+      };
+    });
+  }, [history, unit]);
 
-    return {
-      time: point.time,
-      value: val,
-    };
-  });
-
-  // --- NEW: DYNAMIC CALCULATION ---
-  // 3. Get Start Price (The oldest point in your database)
-  // If history is empty (new DB), assume no change (start = current)
   const startPrice = chartData.length > 0 ? chartData[0].value : currentPrice;
-
-  // 4. Calculate Percentage Change
-  // Formula: ((New - Old) / Old) * 100
-  const changeValue = currentPrice - startPrice;
-  const changePercent = startPrice > 0 ? (changeValue / startPrice) * 100 : 0;
-
-  // 5. Determine Color
+  const changePercent =
+    startPrice > 0 ? ((currentPrice - startPrice) / startPrice) * 100 : 0;
   const isPositive = changePercent >= 0;
-  const chartColor = isPositive ? '#10b981' : '#ef4444'; // Green or Red
-  // --------------------------------
+  const chartColor = isPositive ? '#10b981' : '#ef4444';
 
   return (
     <div className="w-full h-full relative">
@@ -84,7 +72,6 @@ export function PriceChart() {
               {isLoading ? 'Loading...' : currencyFormatter(currentPrice)}
             </span>
 
-            {/* DYNAMIC CHANGE INDICATOR */}
             <span
               className={`text-lg font-medium ${
                 isPositive ? 'text-green-600' : 'text-red-600'
@@ -135,7 +122,7 @@ export function PriceChart() {
               opacity={0.3}
             />
             <XAxis
-              dataKey="time"
+              dataKey="date"
               axisLine={false}
               tickLine={false}
               tick={{ fill: 'var(--color-muted-foreground)', fontSize: 11 }}
@@ -146,7 +133,7 @@ export function PriceChart() {
               tickLine={false}
               tick={{ fill: 'var(--color-muted-foreground)', fontSize: 11 }}
               tickFormatter={() => ''}
-              domain={['auto', 'auto']} // Make chart scale dynamic to see small changes
+              domain={['auto', 'auto']}
             />
             <Tooltip
               contentStyle={{
@@ -164,6 +151,7 @@ export function PriceChart() {
               strokeWidth={3}
               fillOpacity={1}
               fill="url(#colorPrice)"
+              animationDuration={500}
             />
           </AreaChart>
         </ResponsiveContainer>

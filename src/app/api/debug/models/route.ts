@@ -27,7 +27,7 @@ export async function GET() {
     // Filter for just the names to make it readable
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const availableModels = data.models.map((m: any) => ({
-      name: m.name.replace('models/', ''), // Clean up the "models/" prefix
+      name: m.name.replace('models/', ''),
       supportedMethods: m.supportedGenerationMethods,
       description: m.description,
     }));
