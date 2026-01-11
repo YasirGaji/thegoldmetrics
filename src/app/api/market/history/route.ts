@@ -1,24 +1,24 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-export const dynamic = 'force-dynamic'; // Ensure it doesn't cache stale data
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Fetch the last 24 records (assuming hourly cron) ordered by time
+    // Fetch last 30 days (since we are doing daily now)
     const { data, error } = await supabase
       .from('gold_prices')
       .select('timestamp, price_usd, price_gbp')
-      .order('timestamp', { ascending: true }) // Oldest first (left to right on chart)
-      .limit(24);
+      .order('timestamp', { ascending: true })
+      .limit(30);
 
     if (error) throw error;
 
-    // Format for the frontend chart (Recharts expects specific keys)
     const formattedData = data.map((row) => ({
+      // CHANGE: Format as "Month Day" (e.g., "Jan 06")
       date: new Date(row.timestamp).toLocaleDateString('en-US', {
         month: 'short',
-        day: 'numeric',
+        day: '2-digit',
       }),
       price_usd: row.price_usd,
       price_gbp: row.price_gbp,
