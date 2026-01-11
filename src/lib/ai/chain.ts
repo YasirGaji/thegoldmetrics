@@ -2,7 +2,7 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { PromptTemplate } from '@langchain/core/prompts';
 
 // 1. Initialize the Model (Gemini via LangChain)
-// We use "flash" for speed/cost, but you could swap to "pro" for deeper reasoning.
+// We use "flash" for speed/cost, but one could swap to "pro" for deeper reasoning.
 export const chatModel = new ChatGoogleGenerativeAI({
   model: 'gemini-3-flash-preview',
   apiKey: process.env.GEMINI_API_KEY,
