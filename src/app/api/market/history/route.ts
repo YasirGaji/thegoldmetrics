@@ -14,6 +14,11 @@ export async function GET() {
 
     if (error) throw error;
 
+    // Return empty array if no data yet (database not populated)
+    if (!data || data.length === 0) {
+      return NextResponse.json([]);
+    }
+
     const formattedData = data.map((row) => ({
       // CHANGE: Format as "Month Day" (e.g., "Jan 06")
       date: new Date(row.timestamp).toLocaleDateString('en-US', {
