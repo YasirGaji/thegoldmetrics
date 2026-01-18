@@ -91,6 +91,14 @@ export function GoldChat() {
                   .map((part) => part.text)
                   .join('') || '';
 
+              const isRefusal =
+                m.role === 'assistant' &&
+                textContent
+                  .toLowerCase()
+                  .includes('i only discuss gold and financial markets');
+
+              const showDisclaimer = m.role === 'assistant' && !isRefusal;
+
               return (
                 <div
                   key={m.id}
@@ -121,6 +129,11 @@ export function GoldChat() {
                     >
                       {textContent}
                     </ReactMarkdown>
+                    {showDisclaimer && (
+                      <p className="mt-3 pt-2 border-t border-gold-light/20 text-[10px] text-muted-foreground italic">
+                        Not a financial advice.
+                      </p>
+                    )}
                   </div>
                 </div>
               );
