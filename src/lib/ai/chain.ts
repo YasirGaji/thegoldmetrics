@@ -30,7 +30,6 @@ PREVIOUS CONVERSATION:
 3. **Context Matters:** If the user mentions a budget (e.g., "20k Naira"), USE IT in your calculations.
 4. **Tone:** Professional, Objective, Direct. No fluff.
 5. **Length:** Keep responses under 150 words.
-6. **Disclaimer:** End with "Not financial advice."
 
 USER QUESTION:
 {question}
