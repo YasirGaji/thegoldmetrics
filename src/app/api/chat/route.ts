@@ -55,7 +55,7 @@ export async function POST(req: Request) {
         newsContext = newsDocs
           .map(
             (doc: { title: string; url: string }) =>
-              `- ${doc.title} (${doc.url})`
+              `- [${doc.title}](${doc.url})`
           )
           .join('\n');
       }
