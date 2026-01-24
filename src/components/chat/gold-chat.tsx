@@ -99,6 +99,17 @@ export function GoldChat() {
 
               const showDisclaimer = m.role === 'assistant' && !isRefusal;
 
+              // Split content and sources section
+              const sourcesMatch = textContent.match(
+                /\n?\*?\*?Sources:?\*?\*?\n?([\s\S]*?)$/i
+              );
+              const mainContent = sourcesMatch
+                ? textContent.replace(sourcesMatch[0], '').trim()
+                : textContent;
+              const sourcesContent = sourcesMatch
+                ? sourcesMatch[1].trim()
+                : null;
+
               return (
                 <div
                   key={m.id}
@@ -127,10 +138,37 @@ export function GoldChat() {
                         ),
                       }}
                     >
-                      {textContent}
+                      {mainContent}
                     </ReactMarkdown>
+                    {sourcesContent && (
+                      <div className="mt-3 pt-2 border-t border-gold-light/20 text-[10px] text-muted-foreground">
+                        <span className="font-semibold">Sources:</span>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            a: ({ href, children }) => (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-gold-dark hover:underline"
+                              >
+                                {children}
+                              </a>
+                            ),
+                            p: ({ children }) => (
+                              <span className="block">{children}</span>
+                            ),
+                          }}
+                        >
+                          {sourcesContent}
+                        </ReactMarkdown>
+                      </div>
+                    )}
                     {showDisclaimer && (
-                      <p className="mt-3 pt-2 border-t border-gold-light/20 text-[10px] text-muted-foreground italic">
+                      <p
+                        className={`text-[10px] text-muted-foreground italic ${sourcesContent ? 'mt-1' : 'mt-3 pt-2 border-t border-gold-light/20'}`}
+                      >
                         Not a financial advice.
                       </p>
                     )}
