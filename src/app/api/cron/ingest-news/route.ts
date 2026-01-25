@@ -1,22 +1,35 @@
 import { NextResponse } from 'next/server';
-import { ingestLatestNews } from '@/lib/ai/news-service';
+import { executeIngestNews } from '@/lib/cron/services';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    console.log('⚡️ Manual Trigger: Ingesting News...');
-    await ingestLatestNews();
+    const authHeader = request.headers.get('authorization');
+    const { searchParams } = new URL(request.url);
+    const key = searchParams.get('key');
+
+    if (
+      authHeader !== `Bearer ${process.env.CRON_SECRET}` &&
+      key !== process.env.CRON_SECRET
+    ) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const result = await executeIngestNews();
+
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.message },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      message: 'News ingestion complete.',
+      message: result.message,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error('Ingestion Failed:', error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Ingest News Route Failed:', message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

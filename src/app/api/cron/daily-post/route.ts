@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { MetalPriceProvider } from '@/lib/gold/metalprice';
-import { generateMarketUpdate } from '@/lib/ai/gemini';
-import { postToTwitter } from '@/lib/social/twitter';
+import { executeDailyPost } from '@/lib/cron/services';
 
 export async function GET(request: Request) {
   try {
@@ -16,33 +14,24 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 1. Fetch Full Report (USD + GBP + Calculations)
-    console.log('🔍 Fetching Gold Report...');
-    const goldProvider = new MetalPriceProvider();
-    const fullReport = await goldProvider.getFullReport();
+    const result = await executeDailyPost();
 
-    // 2. Generate Formatted Post
-    console.log('🧠 Formatting with AI...');
-    const socialPost = await generateMarketUpdate(fullReport);
-
-    // 3. Post to Twitter
-    console.log('📢 Posting to Twitter...');
-    const tweetId = await postToTwitter(socialPost);
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.message },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      data: {
-        report: fullReport,
-        post: socialPost,
-        tweet_id: tweetId,
-      },
+      data: result.data,
     });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error('🚨 Cron Job Failed:', error);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Daily Post Route Failed:', message);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: message },
       { status: 500 }
     );
   }
