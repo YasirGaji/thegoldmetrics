@@ -1,8 +1,13 @@
 {
-  "crons": [
+  "headers": [
     {
-      "path": "/api/cron/dispatcher?key=${CRON_SECRET}",
-      "schedule": "0 * * * *"
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
     }
   ]
 }
