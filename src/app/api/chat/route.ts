@@ -4,10 +4,12 @@ import { supabase } from '@/lib/supabase';
 import { chain } from '@/lib/ai/chain';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+const apiKey = process.env.GEMINI_API_KEY || 'AIzaSy_FAKE_KEY_FOR_BUILD_ONLY';
+
 // Initialize Embedding Model
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const genAI = new GoogleGenerativeAI(apiKey);
 const embeddingModel = genAI.getGenerativeModel({
-  model: 'text-embedding-004',
+  model: 'models/gemini-embedding-001',
 });
 
 export const maxDuration = 30;
@@ -40,11 +42,11 @@ export async function POST(req: Request) {
     let newsContext = 'No recent news available.';
 
     try {
-      // A. Create Embedding for the User's Question
+      // A. Create Embedding
       const result = await embeddingModel.embedContent(userContent);
       const queryEmbedding = result.embedding.values;
 
-      // B. Search Supabase for Matching Articles
+      // B. Search Supabase
       const { data: newsDocs } = await supabase.rpc('match_news', {
         query_embedding: queryEmbedding,
         match_threshold: 0.1,
@@ -52,16 +54,16 @@ export async function POST(req: Request) {
       });
 
       if (newsDocs && newsDocs.length > 0) {
+        // IMPROVED FORMAT: Easier for AI to read and copy
         newsContext = newsDocs
           .map(
-            (doc: { title: string; url: string }) =>
-              `- [${doc.title}](${doc.url})`
+            (doc: { title: string; url: string; summary: string }) =>
+              `Headline: "${doc.title}"\nURL: ${doc.url}\nSummary: ${doc.summary}\n`
           )
-          .join('\n');
+          .join('\n---\n');
       }
     } catch (err) {
       console.error('RAG Retrieval Failed:', err);
-      // Continue without news if RAG fails
     }
 
     // 4. Construct History & Status

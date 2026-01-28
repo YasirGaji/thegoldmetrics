@@ -81,12 +81,13 @@ export async function executeRecordPrice(): Promise<JobResult> {
 export async function executeIngestNews(): Promise<JobResult> {
   try {
     console.log('Ingest News: Starting...');
-    await ingestLatestNews();
+    const result = await ingestLatestNews();
 
     console.log('Ingest News: Success!');
     return {
       success: true,
-      message: 'News ingested',
+      message: `News ingested: ${result.saved} saved, ${result.skipped} skipped, ${result.errors} errors`,
+      data: result,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
