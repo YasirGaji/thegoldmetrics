@@ -92,7 +92,7 @@ export function GoldChat() {
       </button>
 
       {isOpen && (
-        <div className="fixed top-4 left-4 right-4 bottom-24 md:inset-auto md:bottom-24 md:right-6 md:w-115.5 md:h-180 bg-background border border-gold-light/30 rounded-2xl shadow-2xl flex flex-col z-50 animate-fade-up overflow-hidden">
+        <div className="fixed top-4 left-4 right-4 bottom-24 md:top-auto md:left-auto md:bottom-24 md:right-6 md:w-115 md:h-[70vh] bg-background border border-gold-light/30 rounded-2xl shadow-2xl flex flex-col z-50 animate-fade-up overflow-hidden">
           <div className="p-4 bg-primary text-primary-foreground flex flex-col">
             <h3 className="font-bold text-lg">The Gold Consultant</h3>
             <p className="text-xs text-gold-light/80">
@@ -141,7 +141,9 @@ export function GoldChat() {
                 m.role === 'assistant' &&
                 textContent
                   .toLowerCase()
-                  .includes('i only discuss gold and financial markets');
+                  .includes(
+                    'i am a financial analyst. i only discuss gold and financial market strategies.'
+                  );
 
               const showDisclaimer = m.role === 'assistant' && !isRefusal;
 
