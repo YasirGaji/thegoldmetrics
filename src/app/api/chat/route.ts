@@ -4,8 +4,10 @@ import { supabase } from '@/lib/supabase';
 import { chain } from '@/lib/ai/chain';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+const apiKey = process.env.GEMINI_API_KEY || 'AIzaSy_FAKE_KEY_FOR_BUILD_ONLY';
+
 // Initialize Embedding Model
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const genAI = new GoogleGenerativeAI(apiKey);
 const embeddingModel = genAI.getGenerativeModel({
   model: 'models/gemini-embedding-001',
 });

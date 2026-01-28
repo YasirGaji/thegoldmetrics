@@ -4,7 +4,7 @@ import { PromptTemplate } from '@langchain/core/prompts';
 // 1. Initialize the Model
 export const chatModel = new ChatGoogleGenerativeAI({
   model: 'gemini-3-flash-preview',
-  apiKey: process.env.GEMINI_API_KEY,
+  apiKey: process.env.GEMINI_API_KEY || 'AIzaSy_FAKE_KEY_FOR_BUILD_ONLY',
   temperature: 0.4,
   maxOutputTokens: 2048,
 });
