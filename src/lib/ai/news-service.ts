@@ -59,8 +59,8 @@ export async function ingestLatestNews(): Promise<NewsIngestionResult> {
         continue;
       }
 
-      // Limit to top 2 articles per feed to save API tokens
-      const itemsToProcess = feed.items.slice(0, 2);
+      // Limit to top 3 articles per feed to save API tokens
+      const itemsToProcess = feed.items.slice(0, 3);
 
       for (const item of itemsToProcess) {
         result.totalProcessed++;
