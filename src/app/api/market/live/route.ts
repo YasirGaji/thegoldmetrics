@@ -5,27 +5,48 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const { data, error } = await supabase
+    // 1. Fetch Latest Price
+    const { data: latestData, error: latestError } = await supabase
       .from('gold_prices')
       .select('*')
       .order('timestamp', { ascending: false })
       .limit(1)
       .single();
 
-    if (error || !data) {
+    if (latestError || !latestData) {
       throw new Error('No data found in database');
     }
 
-    const priceUsd = Number(data.price_usd);
-    const priceGbp = Number(data.price_gbp);
+    const currentPrice = Number(latestData.price_usd);
+    const priceGbp = Number(latestData.price_gbp);
+
+    // 2. Fetch Price from ~24 hours ago (for accurate % change)
+    // We look for a record older than 24h but newer than 26h to find the best match
+    const yesterday = new Date();
+    yesterday.setHours(yesterday.getHours() - 24);
+
+    const { data: pastData } = await supabase
+      .from('gold_prices')
+      .select('price_usd')
+      .lte('timestamp', yesterday.toISOString())
+      .order('timestamp', { ascending: false })
+      .limit(1)
+      .single();
+
+    // Calculate Change
+    let changePercent = 0;
+    if (pastData) {
+      const pastPrice = Number(pastData.price_usd);
+      changePercent = ((currentPrice - pastPrice) / pastPrice) * 100;
+    }
 
     return NextResponse.json({
-      price: priceUsd,
+      price: currentPrice,
       price_gbp: priceGbp,
-      gram: priceUsd / 31.1035,
-      kilo: priceUsd * 32.1507,
-      timestamp: data.timestamp,
-      change_24h: 0.45,
+      gram: currentPrice / 31.1035,
+      kilo: currentPrice * 32.1507,
+      timestamp: latestData.timestamp,
+      change_24h: changePercent, // Now dynamic!
     });
   } catch (error) {
     console.error('Live Route Error:', error);

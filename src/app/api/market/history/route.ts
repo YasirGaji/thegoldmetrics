@@ -5,12 +5,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Fetch last 30 days (since we are doing daily now)
+    // Fetch last 90 records (with 3 updates per day, this gives us ~30 days)
     const { data, error } = await supabase
       .from('gold_prices')
       .select('timestamp, price_usd, price_gbp')
       .order('timestamp', { ascending: true })
-      .limit(30);
+      .limit(90);
 
     if (error) throw error;
 
@@ -19,15 +19,45 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
-    const formattedData = data.map((row) => ({
-      // CHANGE: Format as "Month Day" (e.g., "Jan 06")
-      date: new Date(row.timestamp).toLocaleDateString('en-US', {
-        month: 'short',
-        day: '2-digit',
-      }),
-      price_usd: row.price_usd,
-      price_gbp: row.price_gbp,
-    }));
+    // Aggregate by day - take the LAST price of each day for chart
+    // This gives us end-of-day prices which are standard for financial charts
+    const dailyData = new Map<
+      string,
+      { price_usd: number; price_gbp: number; timestamp: string }
+    >();
+
+    data.forEach((row) => {
+      const date = new Date(row.timestamp);
+      const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+
+      // Keep the last (most recent) price for each day
+      if (
+        !dailyData.has(dateKey) ||
+        new Date(row.timestamp) > new Date(dailyData.get(dateKey)!.timestamp)
+      ) {
+        dailyData.set(dateKey, {
+          price_usd: row.price_usd,
+          price_gbp: row.price_gbp,
+          timestamp: row.timestamp,
+        });
+      }
+    });
+
+    // Convert to array and format dates
+    const formattedData = Array.from(dailyData.values())
+      .sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      )
+      .map((row) => ({
+        // Format as "Month Day" (e.g., "Jan 06")
+        date: new Date(row.timestamp).toLocaleDateString('en-US', {
+          month: 'short',
+          day: '2-digit',
+        }),
+        price_usd: row.price_usd,
+        price_gbp: row.price_gbp,
+      }));
 
     return NextResponse.json(formattedData);
 

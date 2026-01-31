@@ -22,7 +22,8 @@ const currencyFormatter = (value: number) =>
 type Unit = 'oz' | 'g' | 'kg';
 
 export function PriceChart() {
-  const { prices, isLoading: isLiveLoading } = useGoldPrice();
+  // 1. Extract 'change' from the hook
+  const { prices, change, isLoading: isLiveLoading } = useGoldPrice();
   const { history, isLoading: isHistoryLoading } = useGoldHistory();
   const [unit, setUnit] = useState<Unit>('oz');
 
@@ -42,10 +43,12 @@ export function PriceChart() {
     });
   }, [history, unit]);
 
-  const startPrice = chartData.length > 0 ? chartData[0].value : currentPrice;
-  const changePercent =
-    startPrice > 0 ? ((currentPrice - startPrice) / startPrice) * 100 : 0;
-  const isPositive = changePercent >= 0;
+  // 2. USE THE API CHANGE INSTEAD OF CALCULATING IT LOCALLY
+  // We default to 0 if undefined.
+  const dailyChange = change || 0;
+
+  // 3. Determine Color based on the API's 24h change
+  const isPositive = dailyChange >= 0;
   const chartColor = isPositive ? '#10b981' : '#ef4444';
 
   return (
@@ -78,7 +81,7 @@ export function PriceChart() {
               }`}
             >
               {isPositive ? '+' : ''}
-              {changePercent.toFixed(2)}%
+              {dailyChange.toFixed(2)}%
             </span>
           </div>
         </div>
