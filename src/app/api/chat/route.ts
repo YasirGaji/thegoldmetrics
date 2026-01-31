@@ -4,21 +4,21 @@ import { supabase } from '@/lib/supabase';
 import { chain } from '@/lib/ai/chain';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// 1. Initialize Embedding Model
 const apiKey = process.env.GEMINI_API_KEY || 'AIzaSy_FAKE_KEY_FOR_BUILD_ONLY';
-
-// Initialize Embedding Model
 const genAI = new GoogleGenerativeAI(apiKey);
 const embeddingModel = genAI.getGenerativeModel({
   model: 'models/gemini-embedding-001',
 });
 
-export const maxDuration = 30;
+// 2. MAX TIMEOUT (Critical Fix)
+export const maxDuration = 60; // Increased from 30 to 60
 
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
 
-    // 1. Extract User's Latest Question
+    // Extract User's Latest Question
     const latestMessage = messages[messages.length - 1];
     const userContent =
       latestMessage?.parts
@@ -26,47 +26,56 @@ export async function POST(req: Request) {
         .map((p: { text: string }) => p.text)
         .join('') || '';
 
-    // 2. Fetch Live Price (Deterministic Context)
-    const { data: priceData } = await supabase
-      .from('gold_prices')
-      .select('price_usd, timestamp')
-      .order('timestamp', { ascending: false })
-      .limit(1)
-      .single();
+    // --- PARALLEL EXECUTION START ---
+    // We launch both "Price Fetching" and "News Retrieval" simultaneously
+    // instead of waiting for one to finish before starting the other.
 
-    const currentPrice = priceData?.price_usd
-      ? `$${Number(priceData.price_usd).toLocaleString()}`
-      : 'Unavailable';
+    const [priceResult, newsContext] = await Promise.all([
+      // Task A: Fetch Live Price
+      supabase
+        .from('gold_prices')
+        .select('price_usd, timestamp')
+        .order('timestamp', { ascending: false })
+        .limit(1)
+        .single()
+        .then(({ data }) => {
+          return data?.price_usd
+            ? `$${Number(data.price_usd).toLocaleString()}`
+            : 'Unavailable';
+        }),
 
-    // 3. RAG: Retrieve Relevant News (Semantic Context)
-    let newsContext = 'No recent news available.';
+      // Task B: RAG (Embed + Search) with Fail-Safe
+      (async () => {
+        try {
+          // 1. Embed
+          const result = await embeddingModel.embedContent(userContent);
+          const queryEmbedding = result.embedding.values;
 
-    try {
-      // A. Create Embedding
-      const result = await embeddingModel.embedContent(userContent);
-      const queryEmbedding = result.embedding.values;
+          // 2. Search
+          const { data: newsDocs } = await supabase.rpc('match_news', {
+            query_embedding: queryEmbedding,
+            match_threshold: 0.1,
+            match_count: 3,
+          });
 
-      // B. Search Supabase
-      const { data: newsDocs } = await supabase.rpc('match_news', {
-        query_embedding: queryEmbedding,
-        match_threshold: 0.1,
-        match_count: 3,
-      });
+          if (newsDocs && newsDocs.length > 0) {
+            return newsDocs
+              .map(
+                (doc: { title: string; url: string; summary: string }) =>
+                  `Headline: "${doc.title}"\nURL: ${doc.url}\nSummary: ${doc.summary}\n`
+              )
+              .join('\n---\n');
+          }
+          return 'No recent news available.';
+        } catch (err) {
+          console.error('RAG Background Error:', err);
+          return 'News context unavailable due to temporary error.';
+        }
+      })(),
+    ]);
+    // --- PARALLEL EXECUTION END ---
 
-      if (newsDocs && newsDocs.length > 0) {
-        // IMPROVED FORMAT: Easier for AI to read and copy
-        newsContext = newsDocs
-          .map(
-            (doc: { title: string; url: string; summary: string }) =>
-              `Headline: "${doc.title}"\nURL: ${doc.url}\nSummary: ${doc.summary}\n`
-          )
-          .join('\n---\n');
-      }
-    } catch (err) {
-      console.error('RAG Retrieval Failed:', err);
-    }
-
-    // 4. Construct History & Status
+    // Construct Chat History
     const historyMessages = messages.slice(0, -1);
     const chatHistory = historyMessages
       .map((m: { role: string; parts?: { type: string; text: string }[] }) => {
@@ -83,12 +92,12 @@ export async function POST(req: Request) {
     const isWeekend = day === 0 || day === 6;
     const status = isWeekend ? 'Closed (Weekend)' : 'Open (Live Trading)';
 
-    // 5. Run Chain with all context
+    // Run Chain
     const stream = await chain.stream({
-      price: currentPrice,
+      price: priceResult, // Result from Task A
       market_status: status,
       chat_history: chatHistory || 'No previous context.',
-      news_context: newsContext,
+      news_context: newsContext, // Result from Task B
       question: userContent,
     });
 
