@@ -27,18 +27,22 @@ export async function GET(request: Request) {
 
     // --- JOB EXECUTION ---
 
-    // A. Daily Post (2 PM Lagos, Mon-Fri)
+    // A. Record Price (3x daily: 8am, 2pm, 8pm Lagos - Mon-Fri)
+    // Rate-limited by executeRecordPrice to prevent quota exhaustion on manual refreshes
+    const PRICE_CHECK_HOURS = [8, 14, 20];
+    if (PRICE_CHECK_HOURS.includes(currentHourLagos) && !isWeekend) {
+      console.log(
+        `Dispatcher: Triggering Price Check (${currentHourLagos}:00 WAT)...`
+      );
+      const result = await executeRecordPrice();
+      results.push({ job: 'record-price', ...result });
+    }
+
+    // B. Daily Post (2 PM Lagos, Mon-Fri)
     if (currentHourLagos === 14 && !isWeekend) {
       console.log('Dispatcher: Triggering Daily Post...');
       const result = await executeDailyPost();
       results.push({ job: 'daily-post', ...result });
-    }
-
-    // B. Record Price (9 PM Lagos, Mon-Fri)
-    if (currentHourLagos === 21 && !isWeekend) {
-      console.log('Dispatcher: Triggering Record Price...');
-      const result = await executeRecordPrice();
-      results.push({ job: 'record-price', ...result });
     }
 
     // C. Ingest News (Every 4 Hours, Mon-Fri)
