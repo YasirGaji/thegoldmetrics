@@ -237,9 +237,9 @@ export default function Dashboard() {
                 </label>
                 <select
                   className="w-full p-2 border rounded text-sm"
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   value={form.unit}
                   onChange={(e) =>
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     setForm({ ...form, unit: e.target.value as any })
                   }
                 >
