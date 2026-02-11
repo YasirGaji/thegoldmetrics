@@ -1,14 +1,12 @@
 import { GoldChat } from '@/components/chat/gold-chat';
 import { MarketStatus } from '@/components/dashboard/market-status';
 import { PriceChart } from '@/components/dashboard/price-chart';
-import { TickerTape } from '@/components/dashboard/ticker-tape';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col">
-      {/* 1. The Financial Strip */}
-      <TickerTape />
-
       {/* 2. The Main Dashboard Area */}
       <div className="flex-1 container mx-auto px-4 py-12 flex flex-col items-center justify-center space-y-8">
         {/* Header Section */}
@@ -21,6 +19,16 @@ export default function Home() {
             Institutional-grade analysis for the modern investor. Powered by AI,
             verified by math.
           </p>
+        </div>
+
+        <div className="flex justify-center pt-2">
+          <Link
+            href="/dashboard"
+            className="group flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-semibold shadow-lg hover:bg-primary/90 hover:scale-105 transition-all duration-200"
+          >
+            <span>Access Your Vault</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
 
         <div
