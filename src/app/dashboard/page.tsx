@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, TrendingUp, Wallet } from 'lucide-react';
+import { Loader2, Plus, Trash2, TrendingUp, Wallet } from 'lucide-react';
 import { useGoldPrice } from '@/hooks/use-gold-price';
 
 type Holding = {
@@ -111,7 +111,14 @@ export default function Dashboard() {
   const profitPercent = totalCost > 0 ? (profit / totalCost) * 100 : 0;
 
   if (loading)
-    return <div className="p-8 text-gold animate-pulse">Syncing Vault...</div>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3">
+        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+        <p className="text-sm font-medium text-muted-foreground">
+          Syncing Vault...
+        </p>
+      </div>
+    );
 
   return (
     <div className="min-h-screen p-4 md:p-8">
