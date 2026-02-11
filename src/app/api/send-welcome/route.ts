@@ -16,7 +16,16 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ error });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    console.error('RESEND API ERROR:', error);
+
+    return NextResponse.json(
+      {
+        message: 'Failed to send email',
+        error: error.message || error.toString(),
+      },
+      { status: 500 }
+    );
   }
 }
