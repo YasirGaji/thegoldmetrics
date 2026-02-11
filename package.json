@@ -23,6 +23,7 @@
     "@langchain/core": "^1.1.12",
     "@langchain/google-genai": "^2.1.7",
     "@react-email/components": "^1.0.7",
+    "@react-email/render": "^2.0.4",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.93.3",
     "ai": "^6.0.27",
