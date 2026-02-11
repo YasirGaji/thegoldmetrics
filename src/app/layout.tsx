@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { CSPostHogProvider } from './providers';
+import { Navbar } from '@/components/layout/navbar';
+import { TickerTape } from '@/components/dashboard/ticker-tape';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,7 +33,11 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
           suppressHydrationWarning
         >
-          {children}
+          <div className="fixed top-0 left-0 right-0 z-50 h-10 bg-primary">
+            <TickerTape />
+          </div>
+          <Navbar />
+          <div className="pt-28">{children}</div>
         </body>
       </CSPostHogProvider>
     </html>

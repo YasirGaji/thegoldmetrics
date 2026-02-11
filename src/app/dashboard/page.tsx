@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogOut, Plus, Trash2, TrendingUp, Wallet } from 'lucide-react';
+import { Plus, Trash2, TrendingUp, Wallet } from 'lucide-react';
 import { useGoldPrice } from '@/hooks/use-gold-price';
 
 type Holding = {
@@ -114,7 +114,7 @@ export default function Dashboard() {
     return <div className="p-8 text-gold animate-pulse">Syncing Vault...</div>;
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -123,11 +123,13 @@ export default function Dashboard() {
               My Vault
             </h1>
             <p className="text-muted-foreground text-sm">
-              Welcome back to your Institutional Portfolio Tracker{' '}
-              {user.user_metadata.full_name}
+              Welcome back to your Institutional Portfolio Tracker,{' '}
+              <span className="font-semibold text-primary">
+                {user.user_metadata.full_name}
+              </span>
             </p>
           </div>
-          <button
+          {/* <button
             onClick={async () => {
               await supabase.auth.signOut();
               router.push('/');
@@ -135,7 +137,7 @@ export default function Dashboard() {
             className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
           >
             <LogOut className="w-3 h-3" /> Sign Out
-          </button>
+          </button> */}
         </div>
 
         {/* Stats Grid */}

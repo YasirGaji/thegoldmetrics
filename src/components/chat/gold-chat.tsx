@@ -80,16 +80,30 @@ export function GoldChat() {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-2xl bg-primary text-primary-foreground hover:bg-gold-dark z-60 transition-all duration-300 hover:scale-105 flex items-center justify-center"
-      >
-        {isOpen ? (
-          <X className="h-6 w-6" />
-        ) : (
-          <MessageSquare className="h-6 w-6" />
+      <div className="fixed bottom-6 right-17 z-60 flex items-end gap-3">
+        {!isOpen && (
+          <div
+            onClick={() => setIsOpen(true)}
+            className="mb-10 max-w-56 cursor-pointer rounded-2xl rounded-br-sm bg-white px-4 py-3 text-xs leading-relaxed text-primary shadow-lg border border-gold-light/30 animate-fade-up"
+          >
+            <p className="font-semibold text-gold-dark">The Gold Consultant</p>
+            <p className="mt-0.5 text-muted-foreground">
+              Ask me anything about the current gold market and investment
+              strategies.
+            </p>
+          </div>
         )}
-      </button>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="h-14 w-14 rounded-full shadow-2xl bg-primary text-primary-foreground hover:bg-gold-dark transition-all duration-300 hover:scale-105 flex items-center justify-center shrink-0"
+        >
+          {isOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <MessageSquare className="h-6 w-6" />
+          )}
+        </button>
+      </div>
 
       {isOpen && (
         <div className="fixed top-4 left-4 right-4 bottom-24 md:top-auto md:left-auto md:bottom-24 md:right-6 md:w-115 md:h-[70vh] bg-background border border-gold-light/30 rounded-2xl shadow-2xl flex flex-col z-50 animate-fade-up overflow-hidden">
