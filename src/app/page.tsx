@@ -1,4 +1,3 @@
-import { GoldChat } from '@/components/chat/gold-chat';
 import { MarketStatus } from '@/components/dashboard/market-status';
 import { PriceChart } from '@/components/dashboard/price-chart';
 import Link from 'next/link';
@@ -38,8 +37,6 @@ export default function Home() {
           <PriceChart />
         </div>
       </div>
-
-      <GoldChat />
     </main>
   );
 }

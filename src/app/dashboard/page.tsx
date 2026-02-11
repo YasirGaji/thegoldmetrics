@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Plus, Trash2, TrendingUp, Wallet } from 'lucide-react';
 import { useGoldPrice } from '@/hooks/use-gold-price';
+import { OnboardingModal } from '@/components/dashboard/onboarding-modal';
 
 type Holding = {
   id: string;
@@ -122,12 +123,13 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
+      <OnboardingModal />
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-primary">
-              My Vault
+              TGM Vault
             </h1>
             <p className="text-muted-foreground text-sm">
               Welcome back to your Institutional Portfolio Tracker,{' '}
