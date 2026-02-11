@@ -5,6 +5,7 @@ import { CSPostHogProvider } from './providers';
 import { Navbar } from '@/components/layout/navbar';
 import { TickerTape } from '@/components/dashboard/ticker-tape';
 import { Footer } from '@/components/layout/footer';
+import { GoldChat } from '@/components/chat/gold-chat';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -41,9 +42,10 @@ export default function RootLayout({
             <TickerTape />
           </div>
           <Navbar />
-          <div className="pt-28">{children}</div>
+          <main className="pt-28">{children}</main>
+          <Footer />
+          <GoldChat />
         </body>
-        <Footer />
       </CSPostHogProvider>
     </html>
   );
