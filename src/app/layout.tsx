@@ -4,6 +4,7 @@ import './globals.css';
 import { CSPostHogProvider } from './providers';
 import { Navbar } from '@/components/layout/navbar';
 import { TickerTape } from '@/components/dashboard/ticker-tape';
+import { Footer } from '@/components/layout/footer';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -42,6 +43,7 @@ export default function RootLayout({
           <Navbar />
           <div className="pt-28">{children}</div>
         </body>
+        <Footer />
       </CSPostHogProvider>
     </html>
   );
