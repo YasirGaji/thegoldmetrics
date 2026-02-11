@@ -26,7 +26,7 @@ export default function Home() {
             href="/dashboard"
             className="group flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-semibold shadow-lg hover:bg-primary/90 hover:scale-105 transition-all duration-200"
           >
-            <span>Access My Vault</span>
+            <span>Access Your Vault</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
