@@ -25,8 +25,10 @@ export default function WelcomeEmail({ name }: WelcomeEmailProps) {
           <Heading style={h1}>The Gold Metrics</Heading>
           <Text style={text}>Hello {name},</Text>
           <Text style={text}>
-            Your institutional vault is ready. You now have access to real-time
-            gold analytics and the $10k Practice Simulator.
+            Your institutional vault is ready. You now have access to{' '}
+            <strong>log your physical gold holdings</strong> and track their
+            real-time market value, so you always know exactly what your Gold
+            assets are worth.
           </Text>
           <Section style={btnContainer}>
             <Button style={button} href="https://thegoldmetrics.com/dashboard">

@@ -123,7 +123,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
-      <OnboardingModal />
+      <OnboardingModal user={user} />
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">

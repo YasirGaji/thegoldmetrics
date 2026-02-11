@@ -1,20 +1,38 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { X, Sparkles, Bot, TrendingUp } from 'lucide-react';
 
-export function OnboardingModal() {
+interface OnboardingModalProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  user: any;
+}
+
+export function OnboardingModal({ user }: OnboardingModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const emailSentRef = useRef(false);
 
   useEffect(() => {
-    // Check if user has already seen this modal
     const hasSeen = localStorage.getItem('tgm_onboarding_seen_v1');
+
     if (!hasSeen) {
-      // Small delay for smooth entrance
       const timer = setTimeout(() => setIsOpen(true), 1000);
+
+      if (!emailSentRef.current && user?.email) {
+        emailSentRef.current = true;
+
+        fetch('/api/send-welcome', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: user.email,
+            name: user.user_metadata?.full_name || 'Investor',
+          }),
+        }).catch((err) => console.error('Failed to send welcome email:', err));
+      }
+
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [user]);
 
   const handleClose = () => {
     setIsOpen(false);
