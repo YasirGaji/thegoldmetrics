@@ -62,8 +62,8 @@ export function Footer() {
         <div className="space-y-4">
           <h3 className="font-semibold text-primary">Daily Market Briefing</h3>
           <p className="text-sm text-gray-500">
-            Join the waitlist for Paper trading feature simulator and also get
-            the &ldquo;Gold Morning&quot; report delivered to your inbox. No
+            Join the waitlist for our Paper trading feature simulator and also
+            get the &ldquo;Gold Morning&quot; report delivered to your inbox. No
             spam, just data.
           </p>
 
