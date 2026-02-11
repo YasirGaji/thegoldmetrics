@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   title: 'The Gold Metrics',
   description:
     'Gold Education, Trading Access, insights and digital innovation...',
+  verification: {
+    google: 'PASTE_YOUR_GOOGLE_CODE_HERE',
+  },
 };
 
 export default function RootLayout({
