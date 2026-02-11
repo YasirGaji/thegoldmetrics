@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import WelcomeEmail from '@/emails/welcome';
 import { NextResponse } from 'next/server';
+import { render } from '@react-email/render';
 
 export async function POST(request: Request) {
   try {
@@ -8,11 +9,13 @@ export async function POST(request: Request) {
 
     const { email, name } = await request.json();
 
+    const emailHtml = await render(WelcomeEmail({ name }));
+
     const data = await resend.emails.send({
       from: 'The Gold Metrics <onboarding@thegoldmetrics.com>',
       to: [email],
       subject: 'Welcome to The Gold Metrics Vault',
-      react: WelcomeEmail({ name }),
+      html: emailHtml,
     });
 
     return NextResponse.json(data);
