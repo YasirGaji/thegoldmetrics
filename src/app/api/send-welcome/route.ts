@@ -9,9 +9,9 @@ export async function POST(request: Request) {
     const { email, name } = await request.json();
 
     const data = await resend.emails.send({
-      from: 'Onboarding <onboarding@resend.dev>',
+      from: 'The Gold Metrics <onboarding@thegoldmetrics.com>',
       to: [email],
-      subject: 'Welcome to The Gold Metrics',
+      subject: 'Welcome to The Gold Metrics Vault',
       react: WelcomeEmail({ name }),
     });
 
