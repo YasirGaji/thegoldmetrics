@@ -22,6 +22,8 @@
 
   /* --- Custom Animations --- */
   --animate-fade-up: fade-up 0.8s ease-out forwards;
+  --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
+  --animate-nudge: nudge 4s ease-in-out infinite;
   --animate-fade-in: fade-in 1s ease-out forwards;
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
@@ -126,6 +128,19 @@ body {
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+  50% { box-shadow: 0 4px 20px rgba(184, 157, 79, 0.35); }
+}
+
+@keyframes nudge {
+  0%, 30%, 100% { transform: translateY(0); }
+  5% { transform: translateY(-6px); }
+  10% { transform: translateY(0); }
+  15% { transform: translateY(-4px); }
+  20% { transform: translateY(0); }
 }
 
 @-webkit-keyframes accordion-down {

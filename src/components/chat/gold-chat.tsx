@@ -80,11 +80,11 @@ export function GoldChat() {
 
   return (
     <>
-      <div className="fixed bottom-6 right-17 z-60 flex items-end gap-3">
+      <div className="fixed bottom-6 right-6 md:right-17 z-60 flex items-end gap-1">
         {!isOpen && (
           <div
             onClick={() => setIsOpen(true)}
-            className="mb-10 max-w-56 cursor-pointer rounded-2xl rounded-br-sm bg-white px-4 py-3 text-xs leading-relaxed text-primary shadow-lg border border-gold-light/30 animate-fade-up"
+            className={`mb-10 max-w-56 cursor-pointer rounded-2xl rounded-br-sm bg-white px-4 py-3 text-xs leading-relaxed text-primary shadow-lg border border-gold-light/30 ${messages.length === 0 ? 'animate-nudge' : ''}`}
           >
             <p className="font-semibold text-gold-dark">The Gold Consultant</p>
             <p className="mt-0.5 text-muted-foreground">
