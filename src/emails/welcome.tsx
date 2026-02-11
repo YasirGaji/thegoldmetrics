@@ -36,7 +36,7 @@ export default function WelcomeEmail({ name }: WelcomeEmailProps) {
             </Button>
           </Section>
           <Text style={footer}>
-            Automated via The Gold Metrics Infrastructure.
+            Do not Reply. Automated via The Gold Metrics Infrastructure.
           </Text>
         </Container>
       </Body>
